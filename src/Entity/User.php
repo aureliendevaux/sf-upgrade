@@ -99,9 +99,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @see UserInterface
      */
+    #[\Deprecated]
     public function eraseCredentials(): void
     {
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
+    }
+
+    /** @return mixed[] */
+    public function __serialize(): array
+    {
+        $data = (array) $this;
+
+        if ($this->password !== null) {
+            $data["\0".self::class."\0password"] = hash('crc32c', $this->password);
+        }
+
+        return $data;
     }
 }
