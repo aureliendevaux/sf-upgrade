@@ -1,0 +1,55 @@
+services:
+    php:
+        build:
+            context: .
+            dockerfile: docker/php.dockerfile
+        container_name: dev_sf_upgrade_php
+        image: sf-upgrade/php:1.0
+        labels:
+            caddy: "sf-upgrade.aaa"
+            caddy.tls: internal
+            caddy.reverse_proxy: "{{upstreams 80}}"
+        networks:
+            - dev_net_database
+            - dev_net_mailer
+            - global_reverse_proxy
+        restart: unless-stopped
+        volumes:
+            - ./:/var/www/html
+        working_dir: /var/www/html
+
+    database:
+        container_name: dev_sf_upgrade_database
+        env_file:
+            - .env.local
+        image: postgres:17.4
+        networks:
+            - dev_net_database
+        restart: unless-stopped
+        volumes:
+            - dev_vol_database:/var/lib/postgresql/data
+
+    adminer:
+        container_name: dev_sf_upgrade_adminer
+        image: adminer:latest
+        labels:
+            caddy: "db.sf-upgrade.aaa"
+            caddy.tls: internal
+            caddy.reverse_proxy: "{{upstreams 8080}}"
+        networks:
+            - dev_net_database
+            - test_net_database
+            - global_reverse_proxy
+        restart: unless-stopped
+
+volumes:
+    dev_vol_database:
+        name: dev_vol_sf_upgrade_database
+
+networks:
+    dev_net_database:
+        name: dev_net_sf_upgrade_database
+    dev_net_mailer:
+        name: dev_net_sf_upgrade_mailer
+    global_reverse_proxy:
+        external: true
