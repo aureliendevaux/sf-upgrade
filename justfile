@@ -34,7 +34,7 @@ flush:
 fresh: flush migrate
 
 # Reset database, update schema and execute commands
-reset: flush schema seed
+reset: flush schema
 
 # Make a migration and migrate automatically
 mig: migration migrate
